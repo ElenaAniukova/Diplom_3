@@ -4,8 +4,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import org.junit.Before;
 import org.junit.Test;
-import static io.restassured.RestAssured.given;
-import java.util.Map;
+import static api.Config.BASE_URL;
 import static org.junit.Assert.assertTrue;
 
 public class LoginTest extends BaseTest{
@@ -17,19 +16,8 @@ public class LoginTest extends BaseTest{
         String randomEmail = "ivan_" + System.currentTimeMillis() + "@yandex.ru";
         this.email = randomEmail;
 
-        Map<String, String> userMap = Map.of(
-                "email", randomEmail,
-                "password", PASS_WORD,
-                "name", NAME
-        );
-
-        Response response = given()
-                .header("Content-type", "application/json")
-                .baseUri(BASE_URL)
-                .body(userMap)
-                .post("api/auth/register");
-
-        token = response.path("accessToken");
+        Response response = userClient.createUser(randomEmail, PASS_WORD, NAME);
+        this.token = response.path("accessToken");
     }
 
     @Test
@@ -73,7 +61,7 @@ public class LoginTest extends BaseTest{
     @Description("Проверяем переход на страницу логина и успешную авторизацию")
     public void loginViaEnterButton() {
 
-        driver.get(BASE_URL+ "register");
+        driver.get(BASE_URL + "register");
 
         registerPage.clickEnterButton();
 
@@ -91,7 +79,7 @@ public class LoginTest extends BaseTest{
     @Description("Проверяем переход на страницу логина и успешную авторизацию")
     public void loginViaBackToLoginLink() {
 
-        driver.get(BASE_URL+ "forgot-password");
+        driver.get(BASE_URL + "forgot-password");
 
         forgotPasswordPage.clickBackToLoginLink();
 

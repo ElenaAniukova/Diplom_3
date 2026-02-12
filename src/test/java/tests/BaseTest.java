@@ -1,7 +1,7 @@
 package tests;
 
+import api.UserClient;
 import io.github.bonigarcia.wdm.WebDriverManager;
-import io.qameta.allure.Step;
 import org.junit.After;
 import org.junit.Before;
 import org.openqa.selenium.WebDriver;
@@ -12,11 +12,9 @@ import pages.LoginPage;
 import pages.MainPage;
 import pages.RegisterPage;
 
-import static io.restassured.RestAssured.given;
 
 public abstract class BaseTest {
 
-    protected static final String BASE_URL = "https://stellarburgers.education-services.ru/";
     protected static final String NAME = "Zina";
     protected static final String PASS_WORD = "password123";
 
@@ -27,6 +25,7 @@ public abstract class BaseTest {
     protected LoginPage loginPage;
     protected MainPage mainPage;
     protected ForgotPasswordPage forgotPasswordPage;
+    protected UserClient userClient;
     protected String token;
 
     @Before
@@ -53,28 +52,17 @@ public abstract class BaseTest {
         loginPage = new LoginPage(driver);
         mainPage = new MainPage(driver);
         forgotPasswordPage = new ForgotPasswordPage(driver);
+        userClient = new UserClient();
         email = "eaniu" + System.currentTimeMillis() + "@yandex.ru";
     }
 
     @After
     public void teardownDriver() {
         if (token != null) {
-            deleteUser(token);
+            userClient.deleteUser(token);
         }
         if (driver != null) {
             driver.quit();
         }
     }
-
-    @Step("Удаление пользователя через API")
-    public void deleteUser(String tokenForDeletion) {
-
-        given()
-                .header("Authorization", tokenForDeletion) // Без приставки Bearer
-                .baseUri(BASE_URL)
-                .when()
-                .delete("api/auth/user")
-                .then()
-                .statusCode(202);
-}
 }
